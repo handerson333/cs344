@@ -1,0 +1,143 @@
+#Initializing - Cleaning up - ignore Operation Not Permitted errors
+#Note: this script requires that the current directory (.) be in your PATH in ~/.bashrc
+
+#-----------------------------------------
+#START OF GRADING SCRIPT
+#keygen 20 > key20
+#5 POINTS: key20 must exist
+key20 exists!
+
+#-----------------------------------------
+#5 POINTS: Number of characters in key20, should be 21:
+21 key20
+
+#-----------------------------------------
+#keygen 70000 > key70000
+#5 POINTS: Number of characters in key70000, should be 70001:
+70001 key70000
+
+#-----------------------------------------
+#otp_enc plaintext1 key20 $encport
+#10 POINTS: Should return error about too-short key
+error: mykey is too short
+
+#-----------------------------------------
+#otp_enc plaintext1 key70000 $encport
+#20 POINTS: Should return encrypted version of plaintext1
+TANOVBERN CDCRQCUFBZLASHPPZFBOIKHROY
+
+#-----------------------------------------
+#otp_enc plaintext1 key70000 $encport > ciphertext1
+#10 POINTS: ciphertext1 must exist
+ciphertext1 exists!
+
+#-----------------------------------------
+#10 POINTS: ciphertext1 must be same number of chars as source
+#wc -m plaintext1
+37 plaintext1
+#Should be same: wc -m ciphertext1
+37 ciphertext1
+
+#-----------------------------------------
+#5 POINTS: ciphertext1 should look encrypted
+TANOVBERN CDCRQCUFBZLASHPPZFBOIKHROY
+
+#-----------------------------------------
+#otp_dec ciphertext1 key70000 $encport
+#5 POINTS: Should fail giving error that otp_dec cannot use otp_enc_d
+TUWCZZFIULRPAIAUFGLYWIKCWAKCXVYVXPOG
+
+#-----------------------------------------
+#20 POINTS: should return decrypted ciphertext1 that matches source
+#cat plaintext1
+THE RED GOOSE FLIES AT MIDNIGHT STOP
+#otp_dec ciphertext1 key70000 $decport
+THE RED GOOSE FLIES AT MIDNIGHT STOP
+
+#-----------------------------------------
+#otp_dec ciphertext1 key70000 $decport > plaintext1_a
+#10 POINTS: plaintext1_a must exist
+plaintext1_a exists!
+
+#-----------------------------------------
+#cmp plaintext1 plaintext1_a
+#5 POINTS: plaintext1 must be the same as plaintext1_a:
+#echo $? should be == 0, which means the cmp succeeded!
+0
+
+#-----------------------------------------
+#20 POINTS: concurrent test of encryption - look for 4 properly-sized ciphertext# files, or 5 where the 5th is 0 bytes
+#5 POINTS: Should be only one error about plaintext5 being bad
+Ten second sleep, your program must complete in this time
+error: input contains bad characters
+total 312
+drwxr-xr-x. 1 anderrob upg58357   820 Mar 17 13:05 ./
+drwxr-xr-x. 1 anderrob upg58357   600 Mar 17 12:28 ../
+-rw-r--r--. 1 anderrob upg58357    37 Mar 17 13:05 ciphertext1
+-rw-r--r--. 1 anderrob upg58357   317 Mar 17 13:05 ciphertext2
+-rw-r--r--. 1 anderrob upg58357    17 Mar 17 13:05 ciphertext3
+-rw-r--r--. 1 anderrob upg58357 32769 Mar 17 13:05 ciphertext4
+-rw-r--r--. 1 anderrob upg58357     0 Mar 17 13:05 ciphertext5
+-rwxrwxrwx. 1 anderrob upg58357   147 Mar 14 16:03 compileall
+-rw-r--r--. 1 anderrob upg58357    21 Mar 17 13:05 key20
+-rw-r--r--. 1 anderrob upg58357 70001 Mar 17 13:05 key70000
+-rwxr-xr-x. 1 anderrob upg58357  7438 Mar 17 12:30 keygen
+-rwxrwxrwx. 1 anderrob upg58357   683 Mar 17 12:58 keygen.c
+-rwxr-xr-x. 1 anderrob upg58357 10491 Mar 17 12:30 otp_dec
+-rwxrwxrwx. 1 anderrob upg58357  3504 Mar 17 12:58 otp_dec.c
+-rwxr-xr-x. 1 anderrob upg58357  9790 Mar 17 12:30 otp_dec_d
+-rwxrwxrwx. 1 anderrob upg58357  4053 Mar 17 12:58 otp_dec_d.c
+-rwxr-xr-x. 1 anderrob upg58357 10667 Mar 17 12:30 otp_enc
+-rwxrwxrwx. 1 anderrob upg58357  3897 Mar 17 12:58 otp_enc.c
+-rwxr-xr-x. 1 anderrob upg58357  9822 Mar 17 12:30 otp_enc_d
+-rwxrwxrwx. 1 anderrob upg58357  4105 Mar 17 12:58 otp_enc_d.c
+-rwxrwxrwx. 1 anderrob upg58357  5085 Mar 16 00:01 p4gradingscript
+-rwxrwxrwx. 1 anderrob upg58357    37 Mar 11 17:38 plaintext1
+-rwxrwxrwx. 1 anderrob upg58357   317 Mar 11 17:38 plaintext2
+-rwxrwxrwx. 1 anderrob upg58357    17 Mar 11 17:38 plaintext3
+-rwxrwxrwx. 1 anderrob upg58357 69333 Mar 11 17:38 plaintext4
+-rwxrwxrwx. 1 anderrob upg58357    42 Mar 11 17:38 plaintext5
+-rw-r--r--. 1 anderrob upg58357  2435 Mar 17 13:05 testresults
+
+#-----------------------------------------
+#15 POINTS: concurrent test of decryption - look for 4 plaintext#_a files that match the plaintext# files
+#Ten second sleep, your program must complete in this time
+total 364
+drwxr-xr-x. 1 anderrob upg58357   848 Mar 17 13:05 ./
+drwxr-xr-x. 1 anderrob upg58357   600 Mar 17 12:28 ../
+-rw-r--r--. 1 anderrob upg58357    37 Mar 17 13:05 ciphertext1
+-rw-r--r--. 1 anderrob upg58357   317 Mar 17 13:05 ciphertext2
+-rw-r--r--. 1 anderrob upg58357    17 Mar 17 13:05 ciphertext3
+-rw-r--r--. 1 anderrob upg58357 32769 Mar 17 13:05 ciphertext4
+-rw-r--r--. 1 anderrob upg58357     0 Mar 17 13:05 ciphertext5
+-rwxrwxrwx. 1 anderrob upg58357   147 Mar 14 16:03 compileall
+-rw-r--r--. 1 anderrob upg58357    21 Mar 17 13:05 key20
+-rw-r--r--. 1 anderrob upg58357 70001 Mar 17 13:05 key70000
+-rwxr-xr-x. 1 anderrob upg58357  7438 Mar 17 12:30 keygen
+-rwxrwxrwx. 1 anderrob upg58357   683 Mar 17 12:58 keygen.c
+-rwxr-xr-x. 1 anderrob upg58357 10491 Mar 17 12:30 otp_dec
+-rwxrwxrwx. 1 anderrob upg58357  3504 Mar 17 12:58 otp_dec.c
+-rwxr-xr-x. 1 anderrob upg58357  9790 Mar 17 12:30 otp_dec_d
+-rwxrwxrwx. 1 anderrob upg58357  4053 Mar 17 12:58 otp_dec_d.c
+-rwxr-xr-x. 1 anderrob upg58357 10667 Mar 17 12:30 otp_enc
+-rwxrwxrwx. 1 anderrob upg58357  3897 Mar 17 12:58 otp_enc.c
+-rwxr-xr-x. 1 anderrob upg58357  9822 Mar 17 12:30 otp_enc_d
+-rwxrwxrwx. 1 anderrob upg58357  4105 Mar 17 12:58 otp_enc_d.c
+-rwxrwxrwx. 1 anderrob upg58357  5085 Mar 16 00:01 p4gradingscript
+-rwxrwxrwx. 1 anderrob upg58357    37 Mar 11 17:38 plaintext1
+-rw-r--r--. 1 anderrob upg58357    37 Mar 17 13:05 plaintext1_a
+-rwxrwxrwx. 1 anderrob upg58357   317 Mar 11 17:38 plaintext2
+-rw-r--r--. 1 anderrob upg58357   317 Mar 17 13:05 plaintext2_a
+-rwxrwxrwx. 1 anderrob upg58357    17 Mar 11 17:38 plaintext3
+-rw-r--r--. 1 anderrob upg58357    17 Mar 17 13:05 plaintext3_a
+-rwxrwxrwx. 1 anderrob upg58357 69333 Mar 11 17:38 plaintext4
+-rw-r--r--. 1 anderrob upg58357 32769 Mar 17 13:05 plaintext4_a
+-rwxrwxrwx. 1 anderrob upg58357    42 Mar 11 17:38 plaintext5
+-rw-r--r--. 1 anderrob upg58357  4303 Mar 17 13:05 testresults
+
+#-----------------------------------------
+#Cleaning up - ignore Operation Not Permitted errors
+./p4gradingscript: line 137:  6328 Terminated              otp_enc_d $encport
+./p4gradingscript: line 137:  6329 Terminated              otp_dec_d $decport
+
+#SCRIPT COMPLETE

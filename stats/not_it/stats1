@@ -1,0 +1,179 @@
+
+	#!/bin/bash
+#wide format for when called with stdin
+wide_cols(){
+	
+	i=1
+	cmd < "$datafilepath" | head -1 | tr "\t" "\n" > tmp2$$
+	n=$(wc -l < tmp2$$)
+	while ((i<n))
+		do
+		cut -f$i "$datafilepath" | sort -g > tmp$$
+		sum=0
+		num=0
+		while read -r row
+			do
+			(( sum += row ))
+			(( num++ ))	
+		done < tmp$$
+		#calc median
+	if (( num % 2 == 0)); then
+		tmp_median=$(sort -n < tmp$$ | tail -n $(((1 + num) / 2)) | head -n 1)
+	else
+		tmp_median=$(sort -n < tmp$$ | head -n $(((1 + num) / 2)) | tail -n 1)
+	fi
+	echo -e $(((sum + (num / 2))/num)) >> tmp_mean$$
+       	echo -e $median >> tmp_median$$
+	((i++))
+	done
+	echo "wide cols"
+	echo "mean"
+	cat tmp_mean$$ | tr "\n" "\t"
+	echo ""
+	echo "median"
+	cat tmp_median$$ | tr "\n" "\t"
+	echo ""
+	rm tmp*
+}
+tall_cols(){
+#setup
+	echo "tall cols"
+	echo "Mean   Median"
+	#!/bin/bash
+	i=1
+	cmd < "$datafilepath" | head -1 | tr "\t" "\n" > tmp2$$
+	n=$(wc -l < tmp2$$)
+	while ((i<n))
+		do
+		cut -f$i "$datafilepath" | sort -g > tmp$$
+		sum=0
+		num=0
+		while read -r row
+			do
+			((sum += row))
+			((num++))	
+		done < tmp$$
+		#calc median
+	if (( num % 2 == 0)); then
+		median=$(sort -n < tmp$$ | tail -n $(((1 + num) / 2)) | head -n 1)
+	else
+		median=$(sort -n < tmp$$ | head -n $(((1 + num) / 2)) | tail -n 1)
+	fi
+
+	echo -e $(((sum + (num / 2))/num)) "\t" "$median"
+	((i++))
+	done
+}
+
+tall_rows(){
+	rowamount=$(wc -l < "$datafilepath")
+	cat "$datafilepath"
+cat "$rowamount"	
+#rows
+	#top row
+	echo "tall rows"
+	echo "Mean   Median"
+	for ((i = 1; i <= rowamount; i++));do
+		cmd < "$datafilepath" | head -$((i++)) > tmp$$
+		cmd < tmp$$ | tail -1 | tr "\t" "\n" | sort -g > tmp2$$
+		total=0
+		num=0
+		while read -r row
+			do
+			((total += row))
+			((num++))
+		done < tmp$$
+		if (( num % 2 == 0)); then
+			median=$(sort -n < tmp2$$ | tail -n $(((1 + num) / 2)) | head -n 1)
+		else
+			median=$(sort -n < tmp2$$ | head -n $(((1+num) / 2)) | tail -n 1)
+		fi
+		echo -e $(((total + (num / 2))/num))"\t" "$median" 
+
+	done
+}
+wide_rows(){
+	#!/bin/bash
+	rowamount=$(wc -l < "$datafilepath")
+	#rows
+	#top row
+	
+	for ((i = 1; i <= rowamount; i++));do	
+		cmd < "$datafilepath" | head -$((i++)) > tmp$$
+		cmd < tmp$$ | tail -1 | tr "\t" "\n" | sort -g > tmp2$$
+		total=0
+		num=0
+		while read -r row
+			do
+			((total += row))
+			((num++))
+		done < tmp2$$
+		if (( num % 2 == 0)); then
+			median=$(sort -n < tmp2$$ | tail -n $(((1 + num) / 2)) | head -n 1)
+		else
+			median=$(sort -n < tmp2$$ | head -n $(((1+num) / 2)) | tail -n 1)
+		fi
+		echo -e $(((total + (num / 2))/num)) >> tmp_mean$$
+	       	echo -e "$median >> tmp_median$$"
+		
+	done
+	echo "wide rows"
+	echo "mean"
+	cmd < tmp_mean$$ | tr "\n" "\t"
+	echo ""
+	echo "median"
+	cmd < tmp_median$$ | tr "\n" "\t"
+	echo ""
+	rm tmp*
+}
+echo $#
+
+
+
+
+how_to_use(){
+	echo "SYNTAX: stats {-rows | -cols} [file]" 
+}
+
+#Handling input
+#If the user enters too many arguments
+#!/bin/bash
+if [[ "$#" -gt 2 ]]; then
+	how_to_use
+	exit 1
+fi
+
+#If user specifies cols
+if [[ $1 == -c* ]]; then
+		#check if file name is set
+		datafilepath="datafile$$"
+		if [ "$#" = "1" ]
+		then
+			cat > "$datafilepath"
+			tall_cols
+		elif [ "$#" = "2" ]
+		then
+			datafilepath=$2
+			wide_cols
+		fi
+#If user specifies rows
+elif [[ $1 == -r* ]]; then
+		#check if file name is set
+		datafilepath="datafile$$"
+		if [ $# = 1 ]
+		then
+			cat > "$datafilepath"
+			tall_rows
+		elif [ $# = 2 ]
+		then
+			datafilepath=$2
+			wide_rows
+		fi
+#If nothing matches
+else
+	how_to_use
+	exit 1
+fi
+
+#Clean/Trap Temporary Files
+trap 'rm -f $TMP*$$; rm -f datafile*; exit 1' INT EXIT HUP TERM SIGHUP

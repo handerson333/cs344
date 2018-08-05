@@ -1,0 +1,147 @@
+
+#!/bin/bash
+
+#Trap and clean temporary files
+trap 'rm -f $TMP*$$; exit 1' INT EXIT HUP TERM SIGHUP SIGTERM SIGINT
+
+
+#calculate averages and medians for rows
+function rows {
+	#make a temporary file
+	TMP_FILE=./TMP_FILE$$	
+	#print the toppers for the numbers
+	echo -en "Rows \n"
+	echo -en "Average Median \n"
+	#Set variable row amount to the amount of lines in the given file
+	rowamount=$(wc -l < "$datafile")
+
+	#Go through the file one line at a time
+	for (( i=1; i <= rowamount; i++ )); do
+		#Take the line number and show that many lines from the top, then only look at the bottom of it and sort it and put in a temp file.
+		cat $datafile | head -n $i | tail -n 1 | tr "\t" "\n" | sort -g > TMP_FILE$$
+		sum=0
+		#get the number of numbers in the line
+		num=$( wc -l < TMP_FILE$$ )
+		#read each number in the line and add it to a sum
+		while read line; do
+			(( sum += $line))
+		done < TMP_FILE$$
+		#calculate the average with the correct rounding
+		avg=$(( (sum + (num/2) )/num ))
+		
+		#if the file as an even amount of rows, the higher one is the median
+		if (( rowamount % 2 == 0)); then
+			median=$(sort -n < TMP_FILE$$ | tail -n $(((1 + num) / 2)) | head -n 1)
+		#otherwise the file has an odd amount of rows, the median is the middle
+		else
+			median=$(sort -n < TMP_FILE$$ | head -n $(((1 + num) / 2)) | tail -n 1)
+		fi
+	#print the line's average and median	
+	echo -ne $avg "\t" $median "\n"
+	done
+
+	#remove temporary files
+	rm -f TMP_FILE*$$
+}
+
+
+
+
+#calculate averages and medians for columns
+function cols {	
+	#create temporary files
+	TMP_FILE=./TMP_FILE$$
+	TMP_AVG=./TMP_AVG$$
+	TMP_MED=./TMP_MED$$
+	rowamount=$(wc -l < "$datafile")
+
+	#counters
+	i=0
+	n=1
+	#loop through each column in the file
+	while (( i< (rowamount+1) ))
+	do 
+		sum=0
+		#take the current column, sort it, and put in a temporary file 
+		cut -f$n $datafile | sort -g > $TMP_FILE	
+		#read through each number in that column and add it to sum
+		while read line; do
+			(( sum += line))
+		done < $TMP_FILE
+		#calculate the average with correct rounding and add it to a temporary file
+		echo -ne $(( (sum + (rowamount / 2) ) / rowamount)) >> TMP_AVG$$
+		#add a tab for in between each number
+		echo -ne "\t" >> TMP_AVG$$
+		#if the file as an even amount of rows, the higher one is the median
+		if (( rowamount % 2 == 0)); then
+			cat $TMP_FILE | sort -n | tail -n $(( (1+rowamount) / 2 )) | head -n 1 >> TMP_MED$$
+		#otherwise the file has an odd amount of rows, the median is the middle
+		else
+			cat $TMP_FILE | sort -n | head -n $(( (1+rowamount) / 2 )) | tail -n 1 >> TMP_MED$$
+		fi
+		#add to the counters
+		(( i++ ))
+		(( n++ ))
+	done
+	#averages header
+	echo -e "Column Averages"
+	cat TMP_AVG$$
+	echo -ne "\n"
+	#medians header
+	echo -e "Column Medians"
+	cat TMP_MED$$ | tr "\n" "\t"
+	echo -ne "\n"
+
+	#remove temporary files
+	rm -f TMP*$$
+}
+
+#what to do if user uses the program with wrong syntax
+how_to_use(){
+	echo "./stats {-rows | -cols} [file]" 
+}
+
+
+#create a temp file for the whole program
+datafile="./TMP_datafile$$"
+#if theres only one argument put the output of stdin and put it into the temp file
+if [ "$#" = "1" ]
+then
+	cat > "$datafile"
+#otherwise the datafile is the second argument
+elif [ "$#" = "2" ]
+then
+	datafile=$2
+fi
+
+#check if file to read is actually readable
+#this code was adapted from a snippet in https://github.com/modalpdx/stats/blob/master/stats
+if [[ ! -z $2 && ! -r $2 ]]; then 
+	echo "$0: unable to read $2" 1>&2
+	exit 1
+fi
+
+
+#if the arguments received are greater than 2, show user how to use it and exit with an error
+if [[ $# -gt 2 ]]; then
+	how_to_use
+	exit 1
+fi
+
+
+#if the first argument begins with c, do columns
+if [[ "$1" = -c* ]]; then
+	cols
+#if the first argument begins with r, do rows
+elif [[ "$1" = -r* ]]; then	
+	rows
+#otherwise if nothing matches r or c, then show user how to use and exit with an error
+else 
+	how_to_use
+	exit 1
+fi
+
+#remove temp files just in case they weren't already
+rm -f TMP*$$
+#exit with no error
+exit 0

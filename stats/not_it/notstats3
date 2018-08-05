@@ -1,0 +1,122 @@
+
+#!/bin/bash
+
+#Clean/Trap Temporary Files
+trap 'rm -f $TMP*$$; rm -f datafile*; exit 1' INT EXIT HUP TERM SIGHUP
+
+################# Function definitions #########################
+
+# calculate average and median based on rows
+function rows {
+	TMP=./TMP$$	
+  echo -e Average Median
+  
+  rowamount=$(wc -l < "$datafile")
+
+	
+  for (( i=1; i <= rowamount; i++ )); do
+  cat $datafile | head -n $i | tail -n 1 | tr "\t" "\n" | sort -g > TMP$$
+  sum=0
+  num=$( wc -l < TMP$$ )
+  
+  while read line; do
+		(( sum += $line))
+		
+	done < TMP$$
+	ave=$(( (sum + (num/2) )/num ))
+	if (( rowamount % 2 == 0)); then
+		median=$(sort -n < TMP$$ | tail -n $(((1 + num) / 2)) | head -n 1)
+		
+	else
+		median=$(sort -n < TMP$$ | tail -n $(((1 + num) / 2)) | head -n 1)
+		
+	fi
+  
+  echo -ne $ave "\t" $median "\n"
+  done
+  
+  # remove temporary files
+  rm -f TMP$$
+}
+
+
+
+
+# calculate average and median based on columns
+function cols {	
+  TMP=./TMP$$
+  TMP_AVG=./TMP_AVG$$
+  TMP_MED=./TMP_MED$$
+
+  rowamount=$(wc -l < "$datafile")
+ 
+  i=0
+  n=1
+  while (( i< (rowamount+1) ))
+	do 
+	sum=0
+	cut -f$n $datafile | sort -g > $TMP	
+	while read line; do
+		(( sum += $line))
+	done < $TMP
+	echo -ne $(( (sum + (rowamount / 2) ) / rowamount)) >> TMP_AVG$$
+	echo -ne "\t" >> TMP_AVG$$
+	
+
+	
+	if (( rowamount % 2 == 0)); then
+		cat $TMP | sort -n | tail -n $(( (1+rowamount) / 2 )) | head -n 1 >> TMP_MED$$
+		
+	else
+		cat $TMP | sort -n | head -n $(( (1+rowamount) / 2 )) | tail -n 1 >> TMP_MED$$
+		
+	fi
+	
+	
+	
+  (( i++ ))
+  (( n++ ))
+  done
+  echo -e "Column Averages"
+  cat TMP_AVG$$
+  echo -ne "\n"
+  echo -e "Column Medians"
+  cat TMP_MED$$ | tr "\n" "\t"
+  echo -ne "\n"
+
+  
+  # remove temporary files
+  rm -f TMP$$ TMP_AVG$$ TMP_MED$$
+}
+
+
+how_to_use(){
+	echo "./stats {-rows | -cols} [file]" 
+}
+
+
+# if the number of arguments received is greater than 2, exit
+if [[ $# -gt 2 ]]; then
+  how_to_use
+  exit 1
+fi
+
+# if the first argument begins with c
+if [[ "$1" = -c* ]]; then
+  datafile="${2:-/dev/stdin}"
+  # count the number of lines in the file 
+  
+  cols
+  
+# if the first argument begins with r
+elif [[ "$1" = -r* ]]; then	
+  # if the 2nd argument (the datafile) is not set, read from standard input
+  datafile="${2:-/dev/stdin}"
+  rows
+
+# if nothing matches, tell the user the proper usage of this script
+else 
+  how_to_use
+  exit 1
+fi
+

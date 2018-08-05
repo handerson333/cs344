@@ -1,0 +1,10 @@
+#!/bin/bash
+
+gcc -o t1 en.c
+gcc -o s1 enc_daemon.c
+gcc -o t2 de.c
+gcc -o s2 dec_daemon.c
+gcc -o keygen keygen.c
+
+
+
